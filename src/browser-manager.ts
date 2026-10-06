@@ -1,5 +1,5 @@
-/** EN: Manage a dedicated browser and record-scoped navigation.
- * ZH: 管理专用浏览器及单记录范围导航。 */
+/** EN: Own one configured browser/CDP lifecycle and record queue; unrelated browser processes are not this owner's resources.
+ * ZH: 管理单个已配置浏览器/CDP 生命周期与记录队列，不把其他浏览器进程当成本 owner 的资源。 */
 import { spawn, type ChildProcess } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";

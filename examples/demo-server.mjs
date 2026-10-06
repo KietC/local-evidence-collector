@@ -1,6 +1,6 @@
-/** EN: Implement local collector support logic and explicit interfaces.
- * ZH: 实现本地采集器辅助逻辑与明确接口。 */
-/** EN: EN: Serve synthetic record fixtures on loopback only; no credentials or private inputs.
+/** EN: Serve fixed synthetic loopback fixtures; health and zero-count collections are not full capture certification.
+ * ZH: 提供固定本机虚构样例；健康接口和零计数集合不是全采集认证。 */
+/** EN: Serve synthetic record fixtures on loopback only; no credentials or private inputs.
  * ZH: 此处解释当前操作的局部约束；保持上方英文所述的输入范围和恢复边界。 */
 /** EN: Preserve the local operation's stated scope and guard condition.
  * ZH: ZH: 仅在本机提供虚构记录样例，不使用凭证或私有输入。 */

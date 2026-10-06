@@ -1,0 +1,6 @@
+interface:
+  display_name: "Evidence Pipeline Guard"
+  short_description: "Evidence-aware resume, performance, and source export"
+  default_prompt: "Use $evidence-pipeline-guard to inspect this pipeline or prepare a source-only bundle while preserving evidence and the current scope."
+policy:
+  allow_implicit_invocation: true

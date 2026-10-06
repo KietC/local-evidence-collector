@@ -1,5 +1,5 @@
-/** EN: Expose loopback-only control operations and coordinate isolated capture and repair state.
- * ZH: 提供仅限本机的控制操作，并协调隔离采集及修复状态。 */
+/** EN: Serve loopback control and explicit capture/repair actions; health alone does not prove owner identity or progress.
+ * ZH: 提供本机控制及明确采集/修复操作；健康响应不证明 owner 身份或有效进度。 */
 import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
 import http from "node:http";
@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 try {
     os.setPriority(0, os.constants.priority.PRIORITY_ABOVE_NORMAL);
 }
-catch { /* best effort */ }
+catch { /* EN: Auxiliary best effort; not a main-result PASS. ZH: 辅助操作尽力执行，不代表主结果通过。 */ }
 import { loadAdapter, DEFAULT_ADAPTER_PATH } from "./adapter.js";
 import { BrowserManager, type RecordQueueCursor } from "./browser-manager.js";
 import { CaptureEngine, UI_GAP_REVISIT_RECORD_ID } from "./capture-engine.js";

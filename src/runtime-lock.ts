@@ -1,5 +1,5 @@
-/** EN: Coordinate local filesystem locks and conservative stale-owner cleanup.
- * ZH: 协调本地文件系统锁，并保守清理失效锁持有者。 */
+/** EN: Coordinate local PID/directory locks; PID reuse, stale cleanup and crash windows remain limitations, not fenced ownership proof.
+ * ZH: 协调本机 PID/目录锁；PID 复用、失效清理和崩溃窗口仍是局限，不构成 fencing 所有权证明。 */
 import fs from "node:fs/promises";
 import path from "node:path";
 /** EN: Define the DirectoryLockOwner contract or operation in this module.

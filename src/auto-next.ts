@@ -1,5 +1,5 @@
-/** EN: Determine whether a persisted terminal capture may advance the record queue.
- * ZH: 判断已持久化的采集终态是否允许推进记录队列。 */
+/** EN: Advance only according to a persisted terminal capture outcome and configured queue policy.
+ * ZH: 仅依据已持久化终态采集结果及已配置队列策略推进。 */
 import type { JobStatus } from "./types.js";
 export const AUTO_NEXT_DELAY_MS = 15000;
 export type AutoNextDecision = "advance" | "stop_cancelled" | "ignore";

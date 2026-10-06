@@ -1,0 +1,19 @@
+{
+  "scope": "synthetic",
+  "input_count": 4,
+  "status_counts": {
+    "COMPLETED": 4
+  },
+  "unique_id_count": 4,
+  "error_count": 0,
+  "public_status": "COMPLETE",
+  "owner_alive": false,
+  "owner_identity_verified": false,
+  "progress_observed": false,
+  "receipt_present": true,
+  "hash_bindings_verified": true,
+  "lineage_verified": false,
+  "semantic_quality_verified": false,
+  "source_completeness_verified": false,
+  "intentional_pause": false
+}

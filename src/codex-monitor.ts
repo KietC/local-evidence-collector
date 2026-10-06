@@ -1,5 +1,5 @@
-/** EN: Run an optional locally configured reviewer only for explicit pending events.
- * ZH: 仅对明确待处理事件运行可选的本地配置审查器。 */
+/** EN: Implement optional locally configured reviewer execution; no credentials, thread binding or automatic evidence upload are shipped.
+ * ZH: 实现可选本地配置 reviewer 执行；不附带凭据、任务绑定或自动证据上传。 */
 import { spawn, type ChildProcess } from "node:child_process";
 import fs from "node:fs";
 import fsp from "node:fs/promises";

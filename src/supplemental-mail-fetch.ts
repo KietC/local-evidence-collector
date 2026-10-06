@@ -1,5 +1,5 @@
-/** EN: Fetch explicitly bound supplemental messages using exact local manifests.
- * ZH: 根据精确本地清单补采明确绑定的消息。 */
+/** EN: Fetch explicitly selected message evidence under its source manifest and preserve failures.
+ * ZH: 在来源 manifest 范围内获取明确选定消息证据并保留失败。 */
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import { createReadStream } from "node:fs";

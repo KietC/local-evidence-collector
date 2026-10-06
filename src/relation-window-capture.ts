@@ -1,5 +1,5 @@
-/** EN: Capture explicitly bound message relation windows and verify artifact references.
- * ZH: 采集明确绑定的消息关系窗口，并验证产物引用。 */
+/** EN: Supplement exactly bound message relation windows; never treat a nearby title or record as equivalent evidence.
+ * ZH: 补采精确绑定的消息关系窗口；不能把相似标题或邻近记录当作同一证据。 */
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import { createReadStream } from "node:fs";

@@ -1,5 +1,5 @@
-/** EN: Verify shipped source assets and synthetic adapter URL parsing without live capture.
- * ZH: 验证随附资源和合成适配器 URL 解析，不执行真实采集。 */
+/** EN: Check synthetic assets and adapter URL parsing without live capture or a completeness claim.
+ * ZH: 检查合成资源与适配器 URL 解析，不执行真实采集或宣称完整。 */
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

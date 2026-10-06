@@ -1,5 +1,5 @@
-/** EN: Implement local collector support logic and explicit interfaces.
- * ZH: 实现本地采集器辅助逻辑与明确接口。 */
+/** EN: Support the local collector within the explicit module scope; no live evidence is included in this source.
+ * ZH: 在明确模块范围内辅助本地采集器；本源码不包含真实采集证据。 */
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

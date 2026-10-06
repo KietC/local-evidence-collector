@@ -1,5 +1,5 @@
-/** EN: Persist local evidence, content hashes, identity records and reusable indexes.
- * ZH: 保存本地证据、内容哈希、身份记录及可复用索引。 */
+/** EN: Persist session-bound originals and hash indexes; a matching hash identifies bytes, not semantic truth or upstream completeness.
+ * ZH: 保存会话绑定原件及哈希索引；哈希一致只识别字节，不证明语义真实或上游完整。 */
 import crypto from "node:crypto";
 import { execFile } from "node:child_process";
 import fs from "node:fs/promises";

@@ -1,5 +1,5 @@
-/** EN: Exercise adapter-bound navigation and cookie scope with synthetic hosts only.
- * ZH: 仅用合成主机验证适配器绑定的导航和 Cookie 范围。 */
+/** EN: Support the local collector within the explicit module scope; no live evidence is included in this source.
+ * ZH: 在明确模块范围内辅助本地采集器；本源码不包含真实采集证据。 */
 import assert from "node:assert/strict";
 import test from "node:test";
 import { isCookieDomainForOrigin, isTrustedNavigationUrl, loadAdapter } from "../adapter.js";

@@ -26,3 +26,10 @@ config/local/
 *.key
 __pycache__/
 .pytest_cache/
+
+# EN: Keep local release controls and generated archives outside the public tree.
+# ZH: 私有发布控制文件和生成归档不进入公开源码树。
+*_LOCAL_ONLY.*
+*.zip
+*.partial
+release-control/

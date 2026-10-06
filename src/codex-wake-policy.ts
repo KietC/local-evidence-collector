@@ -1,5 +1,5 @@
-/** EN: Define optional external-review command arguments and terminal-event policy.
- * ZH: 定义可选外部审查命令参数及终态事件策略。 */
+/** EN: Define optional reviewer command policy separately from capture evidence and operator authorization.
+ * ZH: 将可选 reviewer 命令策略与采集证据及操作者授权分开定义。 */
 export type CodexWakeEventKind = "capture_terminal" | "queue_exhausted";
 export type ReviewerDisposition = "keep" | "stop_obsolete" | "stop_timeout";
 /** EN: Define the CurrentReviewEventState contract or operation in this module.

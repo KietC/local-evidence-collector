@@ -1,5 +1,5 @@
-/** EN: Define record adapters, capture states, response artifacts and reconciliation contracts.
- * ZH: 定义记录适配器、采集状态、响应产物及完整性核对契约。 */
+/** EN: Define capture inputs, artifacts and reconciliation units; optional fields do not establish extraction coverage.
+ * ZH: 定义采集输入、产物及对账单位；字段存在不代表已证明提取覆盖率。 */
 /** EN: Define the AdapterTab contract or operation in this module.
  * ZH: 定义本模块的 AdapterTab 契约或操作。 */
 export interface AdapterTab {

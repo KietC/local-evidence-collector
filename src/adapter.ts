@@ -1,5 +1,5 @@
-/** EN: Validate adapter contracts and constrain capture URL scope.
- * ZH: 验证适配器契约并限制采集 URL 范围。 */
+/** EN: Validate complete adapter configuration and exact navigation identity; this is not a source-completeness verifier.
+ * ZH: 验证完整适配器配置和精确导航身份，不承担源系统完整性认证。 */
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

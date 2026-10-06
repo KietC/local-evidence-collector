@@ -1,5 +1,5 @@
-/** EN: Orchestrate bounded page, response, message and attachment capture with reconciliation.
- * ZH: 编排有界页面、响应、消息和附件采集，并执行完整性核对。 */
+/** EN: Capture scoped observed responses and reconcile pagination, detail and resource evidence; binary concurrency is independent of page concurrency.
+ * ZH: 采集范围内已观察响应并核对分页、详情和资源证据；二进制并发独立于分页并发。 */
 import crypto from "node:crypto";
 import os from "node:os";
 import path from "node:path";

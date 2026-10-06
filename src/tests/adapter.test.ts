@@ -1,5 +1,5 @@
-/** EN: Run synthetic regression checks without live record inputs.
- * ZH: 运行合成回归检查，不使用真实记录输入。 */
+/** EN: Support the local collector within the explicit module scope; no live evidence is included in this source.
+ * ZH: 在明确模块范围内辅助本地采集器；本源码不包含真实采集证据。 */
 import assert from "node:assert/strict";
 import test from "node:test";
 import { isAutoCaptureExcludedUrl, isBlockedAiUrl, isSafeObservedGetRecoveryUrl, isTelemetryUrl, loadAdapter, parseRecordUrl } from "../adapter.js";

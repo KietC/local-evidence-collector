@@ -1,4 +1,8 @@
 <#
+EN: Support the local collector within the explicit module scope; no live evidence is included in this source.
+ZH: 在明确模块范围内辅助本地采集器；本源码不包含真实采集证据。
+#>
+<#
 EN: Start one isolated record capture without modifying an existing workspace.
 ZH: 启动单条隔离采集，不修改现有工作区。
 #>

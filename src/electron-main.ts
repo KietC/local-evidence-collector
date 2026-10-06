@@ -1,5 +1,5 @@
-/** EN: Host the desktop UI, dedicated session and local child-server lifecycle.
- * ZH: 承载桌面界面、专用会话和本地子服务生命周期。 */
+/** EN: Host isolated desktop views and child capture lifecycle; sessions stay local and optional reviewer configuration remains private.
+ * ZH: 承载隔离桌面视图与子采集服务生命周期；会话留在本机，可选 reviewer 配置保持私有。 */
 import { spawn, type ChildProcess } from "node:child_process";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
@@ -10,7 +10,7 @@ import { app, BrowserWindow, dialog, ipcMain, session, WebContentsView, type Ipc
 try {
     os.setPriority(0, os.constants.priority.PRIORITY_ABOVE_NORMAL);
 }
-catch { /* best effort */ }
+catch { /* EN: Auxiliary best effort; not a main-result PASS. ZH: 辅助操作尽力执行，不代表主结果通过。 */ }
 import { isBlockedAiUrl, isCookieDomainForOrigin, isTrustedNavigationUrl, loadAdapter } from "./adapter.js";
 import { codexResumeArgs } from "./codex-wake-policy.js";
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -370,7 +370,7 @@ async function startCaptureServer(): Promise<void> {
         if (response.ok)
             return;
     }
-    catch { /* start below */ }
+    catch { /* EN: Continue with the explicit local startup path. ZH: 转入下方明确的本机启动路径。 */ }
     fs.mkdirSync(RUNTIME_ROOT, { recursive: true });
     captureLog ??= fs.createWriteStream(path.join(RUNTIME_ROOT, "desktop-capture-server.log"), { flags: "a" });
     const configuredHeapMb = Number(process.env.CAPTURE_NODE_HEAP_MB);
@@ -392,7 +392,7 @@ async function startCaptureServer(): Promise<void> {
         if (child.pid)
             os.setPriority(child.pid, os.constants.priority.PRIORITY_ABOVE_NORMAL);
     }
-    catch { /* best effort */ }
+    catch { /* EN: Auxiliary best effort; not a main-result PASS. ZH: 辅助操作尽力执行，不代表主结果通过。 */ }
     captureServer = child;
     child.stdout?.pipe(captureLog, { end: false });
     child.stderr?.pipe(captureLog, { end: false });

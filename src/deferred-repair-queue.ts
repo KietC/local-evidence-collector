@@ -1,5 +1,5 @@
-/** EN: Classify and queue incomplete capture outcomes for explicit later repair.
- * ZH: 分类采集不完整结果，并加入明确的后续修复队列。 */
+/** EN: Classify incomplete terminal outcomes for explicit bounded repair; queue existence does not authorize an endless restart loop.
+ * ZH: 分类不完整终态并供明确有界修复；队列存在不授权无限重启。 */
 import { createHash } from "node:crypto";
 import type { CaseRepairCandidate } from "./case-inventory.js";
 export type DeferredRepairStatus = "pending_error" | "pending_warning" | "resolved";

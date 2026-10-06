@@ -1,202 +1,159 @@
 # Local Evidence Collector
+**Local-first browser evidence capture, with an evidence-review Skill and ordered deployment guides.**
 
-**A local-first desktop collector for browser records, related messages, documents, and verifiable evidence.**
-
-[![CI](https://github.com/KietC/local-evidence-collector/actions/workflows/ci.yml/badge.svg)](https://github.com/KietC/local-evidence-collector/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D24-green.svg)](package.json)
-[![TypeScript](https://img.shields.io/badge/TypeScript-source-blue.svg)](src)
-
 [English](#english) | [简体中文](#简体中文)
 
 ## English
 
-### Overview
+### What this project does
+An Electron desktop shell and Playwright engine collect record-scoped pages, observed responses, related messages and attachments into a local evidence workspace. Content hashes, session artifacts and explicit reconciliation states make failures visible.
 
-Local Evidence Collector combines an Electron desktop shell with a Playwright capture engine and a configurable record adapter. It keeps captured evidence on your machine and records hashes, provenance, pagination checks, and explicit failure states.
+The bundled **Evidence Pipeline Guard** Skill adds operational guidance and two independent Python utilities. It is not automatically invoked by the collector, does not change its state machine, and does not turn a capture into a production-certified dataset.
 
-This is a **generalized source release**, not a ready-made connector for a named commercial service. The shipped adapter targets a **synthetic loopback demo only**. To use another record application, you must implement and test its page, field, response, and relationship contracts. Changing an origin alone is not sufficient.
+**The shipped adapter and demo contain synthetic loopback data only. This is not a ready-made connector for a commercial service.** Another source needs its own field, response, pagination, identity and relationship acceptance checks. An origin change alone is insufficient.
+
+### Start here
+| Goal | Read first |
+| --- | --- |
+| Install on a new machine | [Ordered deployment](DEPLOY.md) |
+| Diagnose configuration, low CPU or incomplete capture | [Setup and pitfalls](docs/SETUP_AND_PITFALLS.md) |
+| Adapt a record application | [Adapter guide](docs/ADAPTERS.md), [acceptance checklist](docs/ADAPTER_ACCEPTANCE.md) |
+| Understand core implementation | [Core code map](docs/CORE_CODE_GUIDE.md) |
+| Install/use the optional Skill | [Skill integration](docs/SKILL_INTEGRATION.md) |
+| Package an allowed source release | [Public release boundary](docs/PUBLICATION.md), [release review](docs/PUBLIC_RELEASE_REVIEW.md) |
 
 ### Features
-
-- Desktop browser and local control UI.
-- Record-scoped capture, root-tab traversal, observed response capture, and bounded pagination.
-- Related message detail, tracking, and relation-window capture.
-- Documents, attachments, screenshots, DOM snapshots, and local evidence viewers.
-- SHA-256 content deduplication, source indexes, append-only session artifacts, and reconciliation checks.
-- Explicit incomplete states, deferred repair queues, isolated one-shot capture, and runtime locks.
-- Configurable API, message-detail, and binary-download concurrency.
-- English-first bilingual source documentation and synthetic regression tests.
+- Dedicated desktop browser, loopback control UI and scoped navigation.
+- Observed API responses, bounded pagination, message details and relation windows.
+- Documents, attachments, screenshots, DOM snapshots and local viewers.
+- SHA-256 deduplication, source indexes and session-bound reconciliation.
+- Incomplete-state reporting, explicit one-shot capture and deferred repair.
+- Separate concurrency controls for small API pages, message detail and large binaries.
+- English-first Chinese-second documentation and source annotations.
+- Reusable Skill for status evidence, chronology/lineage, performance/recovery and source-only exports.
 
 ### Quick start
-
-Requirements: Node.js 24+, npm, and an Electron-supported desktop environment. The standalone browser mode additionally needs Chrome or Edge. Windows is the primary supported desktop platform; do not assume every OS-specific operation is portable.
+Requirements: Node.js **24+**, npm, and an Electron-supported desktop. Python **3.11+** is only needed for the optional Skill utilities. No GPU, Qwen, API key or agent account is required for basic capture. Windows is the primary desktop platform.
 
 ```bash
 git clone https://github.com/KietC/local-evidence-collector.git
 cd local-evidence-collector
 npm ci
 npm run build
-npm test
 npm run smoke
 ```
 
-Start the synthetic fixture service in one terminal:
-
+Terminal A:
 ```bash
 npm run demo
 ```
-
-Then start the desktop app in another terminal:
-
+Terminal B, from the same repository:
 ```bash
 npm run desktop
 ```
 
-The demo is served at `http://127.0.0.1:4877/records`. Open the synthetic record from the list. The demo provides illustrative response shapes for adapter development; a complete browser-capture run must still satisfy every reconciliation check. A fixture server responding successfully is not a completeness claim.
+Expected: a local control pane and the synthetic record list at `http://127.0.0.1:4877/records`. Opening a window or answering `/healthz` only proves availability, not successful capture. Read [DEPLOY.md](DEPLOY.md) for external runtime paths, environment inheritance, one-shot isolation and acceptance order.
 
 ### Configuration
-
-| Variable | Purpose | Default |
+| Variable | Role | Default / requirement |
 | --- | --- | --- |
-| `CAPTURE_ADAPTER_PATH` | Local adapter JSON | `adapters/generic/v1/adapter.json` |
-| `CAPTURE_OUTPUT_ROOT` | Evidence workspace; contains `cases/` | `runtime/data/` |
-| `CAPTURE_RUNTIME_ROOT` | Instance state and browser data | `runtime/` |
-| `CAPTURE_CAPTURE_PORT` | Loopback control port | `3210` server / `3211` desktop |
-| `CAPTURE_CDP_PORT` | Loopback browser debugging port | `9333` server / `9334` desktop |
-| `CAPTURE_ONE_SHOT_RECORD_ID` | Isolated record identity | unset |
-| `CAPTURE_UI_GAP_REVISIT_RECORD_ID` | Explicitly authorized revisit identity | unset |
-| `CAPTURE_API_PAGE_CONCURRENCY` | Pagination concurrency | bounded in source |
-| `CAPTURE_MAIL_DETAIL_CONCURRENCY` | Message-detail concurrency | bounded in source |
-| `CAPTURE_RESOURCE_DOWNLOAD_CONCURRENCY` | Large binary concurrency | bounded in source |
+| `CAPTURE_ADAPTER_PATH` | Complete adapter JSON | `adapters/generic/v1/adapter.json` |
+| `CAPTURE_OUTPUT_ROOT` | Private evidence destination | `runtime/data`; use an external local folder for real use |
+| `CAPTURE_RUNTIME_ROOT` | Browser state, locks, logs | `runtime`; separate it from source control |
+| `CAPTURE_CAPTURE_PORT` | Loopback control | desktop 3211; standalone 3210 |
+| `CAPTURE_CDP_PORT` | Loopback browser debugging | desktop 9334; standalone 9333 |
+| `CAPTURE_ONE_SHOT_RECORD_ID` | Explicit isolated record | unset; numeric fixture 1001 for demo |
+| `CAPTURE_QUEUE_COORDINATOR` | Coordinator participation | set 0 for the one-shot launcher |
+| `CAPTURE_API_PAGE_CONCURRENCY` | API-page concurrency | bounded by engine; measure before increasing |
+| `CAPTURE_MAIL_DETAIL_CONCURRENCY` | Message-detail concurrency | independent from binary downloads |
+| `CAPTURE_RESOURCE_DOWNLOAD_CONCURRENCY` | Binary concurrency | keep conservative; responses can enter Node heap |
+| `CAPTURE_NODE_HEAP_MB` | Desktop child Node heap | child defaults to 8192 MiB; not a total system memory limit |
 
-Keep local adapter overrides outside the tracked tree, or under ignored `config/local/`. **Never commit credentials, browser profiles, cookie files, or captured records.** `.env.example` documents variables; environment files are not automatically loaded.
+`.env.example` is documentation, **not an auto-loaded configuration**. Set variables in the terminal that launches the application. Keep local overrides, cookies and reviewer configuration outside the tracked tree. Standalone browser mode additionally needs a locally installed compatible Chrome/Edge.
 
-For isolated Windows capture:
-
-```powershell
-.\scripts\capture-one.ps1 -RecordId 1001 -NoAutoNext
-```
-
-
-### Architecture and source map
-
+### Architecture
 ```text
-Adapter JSON -> BrowserManager -> CaptureEngine
-                                     |
-                                     v
-                               EvidenceStore
-                                     |
-                       manifests + reconciliation
-                                     |
-                    local UI / optional repair queue
+Adapter JSON -> BrowserManager -> CaptureEngine -> EvidenceStore
+                                      |                 |
+                               bounded requests    hashes / manifests
+                                                        |
+                                             UI / explicit repair
+
+Optional Skill -> metadata assessment / source-only ZIP
+                 (not a capture hook or production verifier)
 ```
 
-| Source | Responsibility |
-| --- | --- |
-| [`src/adapter.ts`](src/adapter.ts) | Adapter validation, URL scope, telemetry and AI-host policy |
-| [`src/browser-manager.ts`](src/browser-manager.ts) | Dedicated browser, record-page lookup and queue traversal |
-| [`src/capture-engine.ts`](src/capture-engine.ts) | Full capture orchestration, bounded concurrency and reconciliation |
-| [`src/evidence-store.ts`](src/evidence-store.ts) | Evidence persistence, hash indexes and local viewers |
-| [`src/server.ts`](src/server.ts) | Loopback control server, one-shot and deferred repair operations |
-| [`src/electron-main.ts`](src/electron-main.ts) | Desktop shell, isolated browser session and local server lifecycle |
-| [`src/relation-window-capture.ts`](src/relation-window-capture.ts) | Exact-bound message relation supplementation |
-| [`src/supplemental-mail-fetch.ts`](src/supplemental-mail-fetch.ts) | Explicit-bound supplemental message fetch |
-| [`src/runtime-lock.ts`](src/runtime-lock.ts) | Local process and directory locks |
+The runtime and audit helpers have different trust boundaries. A helper's caller-supplied booleans are observations, not independently verified facts. Existing PID locks do not implement process-start-time fencing. Some file replacements have crash windows. Read the known limits before using live evidence.
 
-Optional reviewer integration code is included for completeness, but **no reviewer configuration, thread identity, executable binding, or model credentials are shipped**. It is inactive without local configuration and is not needed for basic capture.
-
-### Verification and limits
-
+### Validation and limits
+Maintainers can explicitly run:
 ```bash
 npm run check
+npm run build
 npm test
 npm run smoke
 npm run verify:source
 ```
+The Python helpers are separate and are **not covered by npm tests**. This documentation/comment/Skill integration release did not rerun runtime tests. A source privacy review is not behavioral validation.
 
-Tests use synthetic records. They do not certify a live service's export completeness. Hashes establish byte identity, not factual accuracy. Captures can be incomplete when a service hides history, changes pagination, removes messages, returns expired links, or omits data. Read the reconciliation status instead of assuming a finished UI means complete evidence.
+Synthetic PASS, UI completion, byte hashes and local package integrity do not establish external-source completeness, correct event timestamps or a fully usable downstream dataset. A source-only release excludes customer material; running capture can still create sensitive local data. Never expose control/CDP ports or publish runtime contents.
 
-A secret-pattern scan is a release aid, not proof that every possible sensitive literal is absent. Browser session data and captured content are private local artifacts, even if authentication headers are masked. The control service must remain loopback-only; do not expose the control or CDP ports to the Internet.
+### Project map
+```text
+src/                 # capture engine and desktop/control modules
+adapters/generic/v1/ # complete synthetic record contract
+ui/ electron/        # interface and preload code
+examples/            # local synthetic service
+scripts/ tools/      # launch and developer tooling
+docs/                # implementation, acceptance, recovery and publication
+skills/evidence-pipeline-guard/
+  SKILL.md           # optional agent workflow
+  references/        # evidence, time, performance, publication rules
+  scripts/           # stdlib-only advisory and allowlisted ZIP utilities
+```
 
-### Documentation
+### References, help and license
+Documentation structure follows [Playwright](https://github.com/microsoft/playwright), [Puppeteer](https://github.com/puppeteer/puppeteer) and [GitHub README guidance](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes), without copying their implementation or claiming endorsement. See [style research](docs/README_STYLE_RESEARCH.md).
 
-- [Adapter development](docs/ADAPTERS.md)
-- [Architecture, evidence and recovery](docs/ARCHITECTURE.md)
-- [Public-release review and exclusions](docs/PUBLICATION.md)
-- [Contributing](CONTRIBUTING.md)
-- [Security policy](SECURITY.md)
-- [Design and documentation references](docs/REFERENCES.md)
-
-### License
-
-MIT. See [LICENSE](LICENSE). Dependencies retain their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The English license text is authoritative; Chinese documentation is explanatory.
+Report reproducible issues using synthetic examples. Do not attach private logs or browser profiles. See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+**MIT**, including newly added Skill/docs/helpers. The English [LICENSE](LICENSE) is authoritative; dependencies retain their own licenses.
 
 ---
 
 ## 简体中文
 
-### 项目简介
+### 项目是什么
+Electron 桌面界面与 Playwright 引擎将指定记录的页面、已观察响应、相关消息和附件保存到本机，并通过哈希、会话产物和明确对账状态暴露失败。
 
-Local Evidence Collector 是一个本地优先的浏览器证据采集器，结合 Electron 桌面界面、Playwright 采集引擎和可配置记录适配器。采集结果保存在本机，并记录哈希、来源、分页核对结果和明确的失败状态。
+新增的 **Evidence Pipeline Guard** 是可选技能及两个独立 Python 工具，不会自动接入采集器、不修改其状态机，也不产生生产数据认证。默认适配器和演示只包含本机虚构数据，不是任何商业平台的现成连接器。换域名不能替代字段、分页、身份及关系验收。
 
-这是**通用化源码版本**，不是某个商业平台的现成连接器。默认适配器只连接**本机合成演示服务**。接入其他记录系统时，必须实现并验证其页面、字段、响应和关系契约；仅修改域名并不足够。
+### 按顺序使用
+新机先读 [DEPLOY.md](DEPLOY.md)；配置或卡住时读[配置与避坑](docs/SETUP_AND_PITFALLS.md)；接新系统读[适配器指南](docs/ADAPTERS.md)和[验收表](docs/ADAPTER_ACCEPTANCE.md)；核心实现见[源码地图](docs/CORE_CODE_GUIDE.md)；安装技能见[集成说明](docs/SKILL_INTEGRATION.md)。
 
-### 功能
-
-- 桌面浏览器与本地控制界面。
-- 单记录范围采集、标签遍历、已观察网络响应和有界分页。
-- 相关消息详情、追踪和关系窗口回填。
-- 文档、附件、截图、DOM 快照和本地证据查看器。
-- SHA-256 内容去重、来源索引、追加式会话产物和守恒核对。
-- 明确的不完整状态、延后修复队列、隔离单次采集和运行锁。
-- 可配置的分页、消息详情和大文件下载并发。
-- 英文在前、中文在后的源码注释，以及合成回归测试。
-
-### 快速开始
-
-需要 Node.js 24+、npm 和 Electron 支持的桌面环境。独立浏览器模式还需要 Chrome 或 Edge。当前主要支持 Windows 桌面；不能假设所有系统操作都能跨平台使用。
-
+基础采集需要 Node.js 24+、npm 和 Electron 支持的桌面系统，主要支持 Windows。Python 3.11+ 仅用于可选工具。不需要 GPU、本地 Qwen、模型 API key 或 agent 账号。
 ```bash
 git clone https://github.com/KietC/local-evidence-collector.git
 cd local-evidence-collector
 npm ci
 npm run build
-npm test
 npm run smoke
 ```
+第一个终端运行 `npm run demo`，第二个终端运行 `npm run desktop`。预期出现本机控制界面和 `http://127.0.0.1:4877/records` 虚构列表。界面出现或健康接口正常不等于采集成功。
 
-一个终端运行 `npm run demo`，另一个终端运行 `npm run desktop`。演示地址为 `http://127.0.0.1:4877/records`，列表和记录均为虚构数据。演示服务可用于开发适配器，但完整浏览器采集仍须通过全部对账；接口能够返回不等于采集完整。
+### 配置顺序与边界
+先确定源码目录，再确定外部私有 evidence/runtime 目录，再设置完整适配器路径和端口，最后启动。上方表格列出全部主要变量。`.env.example` 不会自动加载；必须在启动应用的同一终端设置环境变量。
 
-### 配置与隐私
+默认证据在 `runtime/data`，状态在 `runtime`；真实使用建议放到源码目录外。桌面控制/CDP 默认 3211/9334，独立服务默认 3210/9333。单记录启动器要求 `-NoAutoNext`，并将 coordinator 设置为 0。`-ResumeExisting` 只是兼容参数，实际续采取决于控制界面的请求。
 
-配置变量见上方英文表格。`CAPTURE_ADAPTER_PATH` 指定本地适配器，`CAPTURE_OUTPUT_ROOT` 指定证据工作区，`CAPTURE_RUNTIME_ROOT` 指定运行状态和浏览器数据位置。默认全部位于项目的 `runtime/` 内，不引用原生产工作区。
+分页、消息、大文件并发分别调节。大文件进入 Node 堆，不能拿几十个 CPU 核直接换成几十个浏览器 owner。`CAPTURE_NODE_HEAP_MB` 只限制桌面子服务的 V8 堆，不是整机内存限额。
 
-本地配置应存放在 Git 跟踪范围外或被忽略的 `config/local/` 内。**不得提交登录凭证、Cookie、浏览器配置目录或真实记录。** `.env.example` 仅用于说明，程序不会自动加载环境文件。
+### 验证、限制与开源范围
+维护者可按英文验证命令检查；Python 工具不属于 npm 测试范围。本次是文档、注释和技能整合，未重新运行行为测试；源码隐私检查不等于行为验收。
 
-Windows 单记录隔离启动：
+PID 锁没有进程启动时间 fencing，部分替换存在崩溃窗口。合成测试、哈希、窗口完成和本地包完整不能证明外部系统没有遗漏，也不能证明时间与关系语义正确。模型只能产生派生判断，不能覆盖源事实。
 
-```powershell
-.\scripts\capture-one.ps1 -RecordId 1001 -NoAutoNext
-```
+公开副本包含采集源码、UI、完整合成适配器、开发工具和通用技能，不包含客户记录、生产配置、Cookie、浏览器会话、缓存、原始历史或模型。真实运行仍可能生成敏感文件，控制/CDP 端口不得对外暴露。提交 issue 使用合成样例，不附私人日志。
 
-实际脚本路径为 `scripts/capture-one.ps1`。`-ResumeExisting` 是兼容参数；是否续采由控制界面的实际采集请求决定，不会仅凭启动参数宣称已续跑。
-
-### 验证与限制
-
-```bash
-npm run check
-npm test
-npm run smoke
-npm run verify:source
-```
-
-测试仅使用合成记录，不能证明真实源系统的导出完整性。哈希证明字节身份，不证明内容真实正确。历史不可见、分页变更、消息删除、链接过期和接口缺项均可能导致不完整结果，应查看对账状态，而不是把界面结束当作完整证明。
-
-秘密模式检查不能保证发现所有敏感字面量。即使认证头已遮蔽，浏览器会话和采集正文仍是本地私有资产。控制服务与 CDP 端口必须只监听本机，不应对互联网暴露。
-
-### 开发文档与许可证
-
-完整模块索引、适配器开发、架构、恢复、公开发布边界、贡献说明和安全策略均在上方文档入口。可选审查器代码未附带配置、任务标识、可执行文件绑定或模型凭证；默认不运行，也不是基础采集的必要依赖。
-
-采用 MIT 许可证，依赖保留各自许可证。以 [LICENSE](LICENSE) 的英文条款为准；中文说明不替代许可证正文。
+README 结构参考 Playwright、Puppeteer 和 GitHub 官方指南，不复制其实现、不宣称背书或同等能力。全部新增内容随项目采用 MIT；以英文 LICENSE 为准，依赖仍遵循各自许可证。

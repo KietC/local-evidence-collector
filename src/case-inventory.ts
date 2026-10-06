@@ -1,5 +1,5 @@
-/** EN: Index completed local evidence cases without treating directory names as PASS receipts.
- * ZH: 建立已完成本地案例索引，不把目录名当作 PASS 凭证。 */
+/** EN: Locate prior case artifacts using identity and completion evidence; directory existence is not a successful receipt.
+ * ZH: 根据身份及完成证据定位已有案例；目录存在不等于成功 receipt。 */
 import fs from "node:fs/promises";
 import path from "node:path";
 import { caseDirectoryNameKey, sha256 } from "./evidence-store.js";
