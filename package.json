@@ -1,0 +1,48 @@
+{
+  "name": "local-evidence-collector",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local desktop evidence capture with configurable adapters, hash manifests and resumable workflows",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "desktop": "electron dist/electron-main.js",
+    "desktop:dev": "npm run build && electron dist/electron-main.js",
+    "dev": "tsx src/server.ts",
+    "start": "node dist/server.js",
+    "supplemental:mail-fetch": "node dist/supplemental-mail-fetch.js",
+    "capture:relation-window": "node dist/relation-window-capture.js",
+    "monitor": "node dist/codex-monitor.js",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "node --import ./tools/test-environment.mjs --test dist/tests/*.test.js",
+    "smoke": "node dist/smoke.js",
+    "demo": "node examples/demo-server.mjs",
+    "verify:source": "node tools/check-public-source.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "1.61.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "electron": "^43.1.1",
+    "tsx": "4.23.1",
+    "typescript": "5.9.3"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true
+  },
+  "license": "MIT",
+  "author": "KietC",
+  "main": "dist/electron-main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KietC/local-evidence-collector.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KietC/local-evidence-collector/issues"
+  },
+  "homepage": "https://github.com/KietC/local-evidence-collector#readme"
+}

@@ -1,0 +1,267 @@
+{
+  "schema": 1,
+  "adapter_id": "generic-record-demo-v1",
+  "updated_at": "2026-10-05",
+  "origin": "http://127.0.0.1:4877",
+  "record_path": "/records/view",
+  "record_list_url": "http://127.0.0.1:4877/records?query=%7B%22show_all%22%3A1%2C%22_p_stage_id%22%3A%221%22%2C%22stage_id%22%3A%221%22%2C%22curPage%22%3A1%2C%22pageSize%22%3A20%2C%22users%22%3A%5B%221%22%2C%222%22%5D%2C%22fields%22%3A%22record.list.fields%22%2C%22sort_scene%22%3A%22setting%22%7D",
+  "record_queue": {
+    "stage_title": "客户阶段",
+    "list_endpoint": "/api/records/list",
+    "page_size": 20,
+    "safety_page_cap": 500
+  },
+  "page_asset_hosts": [
+    "127.0.0.1",
+    "cdn.example.invalid",
+    "assets.example.invalid",
+    "files.example.invalid",
+    "objects.example.invalid"
+  ],
+  "external_ai_blocked_hosts": [
+    "api.openai.com",
+    "chatgpt.com",
+    "openai.com",
+    "api.anthropic.com",
+    "generativelanguage.googleapis.com",
+    "api.mistral.ai",
+    "api.cohere.com"
+  ],
+  "root_tabs": [
+    {
+      "id": "dynamic",
+      "labels": [
+        "动态"
+      ]
+    },
+    {
+      "id": "info",
+      "labels": [
+        "资料"
+      ]
+    },
+    {
+      "id": "trade",
+      "labels": [
+        "商机&交易",
+        "商机＆交易"
+      ]
+    },
+    {
+      "id": "tips",
+      "labels": [
+        "Tips",
+        "TIPS"
+      ]
+    },
+    {
+      "id": "statistics",
+      "labels": [
+        "数据分析"
+      ]
+    },
+    {
+      "id": "relational",
+      "labels": [
+        "文档"
+      ]
+    },
+    {
+      "id": "history",
+      "labels": [
+        "操作历史"
+      ]
+    }
+  ],
+  "dynamic": {
+    "history_labels": [
+      "历史动态"
+    ],
+    "filter_labels": [
+      [
+        "全部"
+      ],
+      [
+        "跟进记录"
+      ],
+      [
+        "聊天记录"
+      ],
+      [
+        "其他动态"
+      ]
+    ],
+    "mail_labels": [
+      "往来邮件",
+      "邮件"
+    ],
+    "next_labels": [
+      "下一页",
+      "下页"
+    ],
+    "trail_endpoint": "/api/events/list",
+    "mail_info_endpoint": "/api/messages/info",
+    "mail_track_endpoint": "/api/messages/track",
+    "mail_module_values": [
+      "202",
+      "201",
+      "3"
+    ],
+    "visible_page_cap": 2,
+    "safety_page_cap": 5000
+  },
+  "documents": {
+    "list_endpoint": "/api/documents/list",
+    "folder_endpoint": "/api/folders/list",
+    "next_labels": [
+      "下一页",
+      "下页"
+    ],
+    "visible_page_cap": 2,
+    "safety_page_cap": 5000
+  },
+  "expected_endpoint_contracts": [
+    {
+      "id": "record_detail",
+      "method": "GET",
+      "path": "/api/records/detail",
+      "min": 1
+    },
+    {
+      "id": "form_fields",
+      "method": "GET",
+      "path": "/api/fields/list",
+      "min": 1
+    },
+    {
+      "id": "contacts",
+      "method": "POST",
+      "path": "/api/contacts/list",
+      "min": 1
+    },
+    {
+      "id": "opportunity",
+      "method": "POST",
+      "path": "/api/opportunities/list",
+      "min": 1
+    },
+    {
+      "id": "orders",
+      "method": "GET",
+      "path": "/api/orders/list",
+      "min": 1
+    },
+    {
+      "id": "related_products",
+      "method": "GET",
+      "path": "/api/related/list",
+      "min": 1
+    },
+    {
+      "id": "operation_history",
+      "method": "GET",
+      "path": "/api/history/list",
+      "min": 1
+    },
+    {
+      "id": "documents",
+      "method": "GET",
+      "path": "/api/documents/list",
+      "min": 1
+    },
+    {
+      "id": "document_folders",
+      "method": "GET",
+      "path": "/api/folders/list",
+      "min": 1
+    },
+    {
+      "id": "dynamic",
+      "method": "GET",
+      "path": "/api/events/list",
+      "min": 1
+    },
+    {
+      "id": "mail_previous_next",
+      "method": "GET",
+      "path": "/api/messages/window",
+      "min": 0
+    },
+    {
+      "id": "analytics",
+      "method": "POST",
+      "path": "/api/analytics/detail",
+      "min": 1
+    }
+  ],
+  "known_count_paths": {
+    "trail": [
+      "data.totalItem",
+      "data.total",
+      "data.count",
+      "totalItem",
+      "total",
+      "count"
+    ],
+    "mail_previous_next": [
+      "data.total",
+      "total"
+    ],
+    "contacts": [
+      "data.totalItem",
+      "data.total",
+      "data.count",
+      "totalItem",
+      "total",
+      "count"
+    ],
+    "documents": [
+      "data.totalItem",
+      "data.total",
+      "data.count",
+      "totalItem",
+      "total",
+      "count"
+    ],
+    "document_folders": [
+      "data.totalItem",
+      "data.total",
+      "data.count",
+      "totalItem",
+      "total",
+      "count"
+    ],
+    "orders": [
+      "data.totalItem",
+      "data.total",
+      "data.count",
+      "totalItem",
+      "total",
+      "count"
+    ],
+    "related_products": [
+      "data.totalItem",
+      "data.total",
+      "data.count",
+      "totalItem",
+      "total",
+      "count"
+    ],
+    "operation_history": [
+      "data.totalItem",
+      "data.total",
+      "data.count",
+      "totalItem",
+      "total",
+      "count"
+    ],
+    "opportunity": [
+      "data.totalItem",
+      "data.total",
+      "data.count",
+      "totalItem",
+      "total",
+      "count"
+    ]
+  }
+}
