@@ -6,6 +6,14 @@ const desktop = window.captureDesktop || null;
 let nextCandidate = null;
 let nextCandidateLoading = false;
 let nextCandidateCheckedAt = 0;
+const marketStageLabels = { plan: "规划查询", search: "搜索候选", penetrate: "官网检索", verify: "核验证据", handoff: "生成交接", demo: "离线演示" };
+const marketInputLabels = { regions: "地区", cldr: "语言映射", terms: "术语", specs: "任务规格", reviewed: "已复核公开项", customerProjection: "客户最小投影", publicEntities: "公开身份" };
+const marketCountLabels = { tasks: "任务", markets: "市场", queries: "查询", candidates: "候选", records: "记录", output_records: "交接记录", network_requests: "联网请求", pattern_passes: "规则通过", held: "待复核", matched: "已匹配", needs_review: "需复核", no_match: "未匹配", verified: "已核验", reviewed: "已复核", completed: "已完成", failed: "失败", blocked: "受阻", pending: "待处理", handoffs: "交接项" };
+let marketDiscoveryState = null;
+let marketConnected = false;
+let marketActionPending = false;
+let marketStatusLoading = false;
+let marketStatusGeneration = 0;
 /** EN: Define the request contract or operation in this module.
  * ZH: 定义本模块的 request 契约或操作。 */
 async function request(url, options = {}) {
@@ -32,6 +40,148 @@ function setBusy(button, busy, label) {
     button.disabled = busy;
     button.textContent = busy ? label : button.dataset.original;
 }
+/** Read metadata only; this panel never starts a stage during refresh. */
+function syncMarketControls() {
+    const running = marketDiscoveryState?.running === true;
+    const allowNetwork = $("#market-allow-network").checked;
+    $("#market-controls").disabled = running || marketActionPending;
+    document.querySelectorAll("[data-market-stage]").forEach(button => {
+        const networkRequired = ["search", "penetrate"].includes(button.dataset.marketStage);
+        button.disabled = !marketConnected || running || marketActionPending || (networkRequired && !allowNetwork);
+        button.title = networkRequired && !allowNetwork ? "先勾选允许本次操作访问公开网站" : "";
+        button.classList.toggle("active", running && button.dataset.marketStage === marketDiscoveryState.stage);
+    });
+    $("#market-cancel").hidden = !running;
+    $("#market-cancel").disabled = marketActionPending;
+}
+function marketError(message = "") {
+    $("#market-error").textContent = message;
+    $("#market-error").hidden = !message;
+}
+function renderMarketDiscovery(status) {
+    marketDiscoveryState = status;
+    marketConnected = true;
+    const running = status.running === true;
+    const stage = marketStageLabels[status.stage] || "发现任务";
+    const state = typeof status.status === "string" ? status.status : "idle";
+    const failed = ["failed", "error", "fail"].includes(state.toLowerCase());
+    const badge = $("#market-status-badge");
+    badge.textContent = running ? "运行中" : failed ? "需检查" : "已就绪";
+    badge.className = `status-badge ${running ? "online" : failed ? "error" : "offline"}`;
+    $("#market-detail").textContent = running ? `${stage} · ${state}` : status.stage ? `${stage} · ${state}。选择阶段后手动开始。` : "尚未启动。选择阶段后手动开始。";
+    $("#market-root").textContent = typeof status.root === "string" ? status.root : "尚未配置";
+    const completed = status.lastCompletedAt ? new Date(status.lastCompletedAt) : null;
+    const completedText = completed && Number.isFinite(completed.getTime()) ? completed.toLocaleString("zh-CN") : "尚无完成记录";
+    $("#market-last-completed").textContent = `最近完成：${completedText}${typeof status.runId === "string" && status.runId ? ` · 任务 ${status.runId}` : ""}`;
+    document.querySelectorAll("[data-market-input]").forEach(node => {
+        const key = node.dataset.marketInput;
+        const available = status.availableInputs?.[key];
+        node.textContent = `${marketInputLabels[key]} ${available === true ? "✓" : available === false ? "缺少" : "—"}`;
+        node.classList.toggle("ready", available === true);
+        node.classList.toggle("missing", available === false);
+    });
+    const counts = $("#market-counts");
+    counts.replaceChildren();
+    if (status.counts && typeof status.counts === "object" && !Array.isArray(status.counts)) {
+        Object.entries(status.counts).filter(([key, value]) => /^[a-zA-Z][a-zA-Z0-9_]{0,39}$/.test(key) && typeof value === "number" && Number.isFinite(value) && value >= 0).slice(0, 12).forEach(([key, value]) => {
+            const item = document.createElement("div");
+            const label = document.createElement("dt");
+            const number = document.createElement("dd");
+            label.textContent = marketCountLabels[key] || key;
+            number.textContent = String(value);
+            item.append(label, number);
+            counts.append(item);
+        });
+    }
+    const error = typeof status.lastError === "string" ? status.lastError : typeof status.lastError?.code === "string" ? status.lastError.code : "";
+    marketError(error);
+    syncMarketControls();
+}
+async function refreshMarketDiscovery() {
+    if (marketStatusLoading || marketActionPending)
+        return;
+    const generation = marketStatusGeneration;
+    marketStatusLoading = true;
+    try {
+        const status = await request("/api/market-discovery/status");
+        if (generation === marketStatusGeneration && !marketActionPending)
+            renderMarketDiscovery(status);
+    }
+    catch (error) {
+        if (generation === marketStatusGeneration && !marketActionPending) {
+            marketConnected = false;
+            $("#market-status-badge").textContent = "状态不可用";
+            $("#market-status-badge").className = "status-badge error";
+            marketError(`发现模块连接失败 · ${error.message}`);
+            syncMarketControls();
+        }
+    }
+    finally {
+        marketStatusLoading = false;
+    }
+}
+function marketOptions(stage) {
+    const marketsInput = $("#market-markets");
+    const markets = [...new Set(marketsInput.value.trim().toUpperCase().split(/[,，;；\s]+/).filter(Boolean))];
+    marketsInput.setCustomValidity(markets.some(value => !/^[A-Z]{2}$/.test(value)) ? "请输入两位国家/地区代码，例如 NL, DE。" : "");
+    for (const input of [marketsInput, $("#market-limit"), $("#market-concurrency")]) {
+        if (!input.reportValidity())
+            return null;
+    }
+    return { stage, allowNetwork: $("#market-allow-network").checked && ["search", "penetrate", "verify"].includes(stage), markets, limit: Number($("#market-limit").value), concurrency: Number($("#market-concurrency").value) };
+}
+document.querySelectorAll("[data-market-stage]").forEach(button => {
+    button.addEventListener("click", async () => {
+        if (marketActionPending || marketDiscoveryState?.running || button.disabled)
+            return;
+        const options = marketOptions(button.dataset.marketStage);
+        if (!options)
+            return;
+        marketActionPending = true;
+        marketStatusGeneration += 1;
+        marketError();
+        setBusy(button, true, "提交中…");
+        syncMarketControls();
+        try {
+            await request("/api/market-discovery/start", { method: "POST", body: JSON.stringify(options) });
+            // Do not reuse network consent for a later click or a later stage.
+            $("#market-allow-network").checked = false;
+            marketDiscoveryState = { ...marketDiscoveryState, running: true, stage: options.stage };
+            renderMarketDiscovery(await request("/api/market-discovery/status"));
+        }
+        catch (error) {
+            marketError(`无法启动发现任务 · ${error.message}`);
+        }
+        finally {
+            marketActionPending = false;
+            setBusy(button, false, "");
+            syncMarketControls();
+        }
+    });
+});
+$("#market-allow-network").addEventListener("change", syncMarketControls);
+$("#market-markets").addEventListener("input", () => $("#market-markets").setCustomValidity(""));
+$("#market-cancel").addEventListener("click", async event => {
+    if (marketActionPending || !marketDiscoveryState?.running)
+        return;
+    const button = event.currentTarget;
+    marketActionPending = true;
+    marketStatusGeneration += 1;
+    setBusy(button, true, "停止中…");
+    syncMarketControls();
+    try {
+        await request("/api/market-discovery/cancel", { method: "POST" });
+        renderMarketDiscovery(await request("/api/market-discovery/status"));
+    }
+    catch (error) {
+        marketError(`无法停止发现任务 · ${error.message}`);
+    }
+    finally {
+        marketActionPending = false;
+        setBusy(button, false, "");
+        syncMarketControls();
+    }
+});
 /** EN: Define the render contract or operation in this module.
  * ZH: 定义本模块的 render 契约或操作。 */
 function render(status) {
@@ -278,5 +428,7 @@ $("#cancel-auto-next").addEventListener("click", async () => {
     await refresh();
 });
 $("#open-case").addEventListener("click", async () => request("/api/open-case", { method: "POST" }));
+void refreshMarketDiscovery();
+setInterval(refreshMarketDiscovery, 2000);
 await refresh();
 setInterval(refresh, 1500);

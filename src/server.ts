@@ -18,6 +18,7 @@ import { AUTO_NEXT_DELAY_MS, autoNextDecision } from "./auto-next.js";
 import { loadCaseInventory, refreshCompletedCase } from "./case-inventory.js";
 import { eligibleDeferredErrors, mergeInventoryRepairCandidates, type DeferredInventoryMergeReport, type DeferredRepairEntry, type DeferredRepairQueue, type DeferredRepairStatus } from "./deferred-repair-queue.js";
 import { removeStaleDirectoryLock, removeStalePidFileLock, withDirectoryLock } from "./runtime-lock.js";
+import { MarketDiscovery } from "./market-discovery.js";
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP_ROOT = path.resolve(HERE, "..");
 const UI_ROOT = path.join(APP_ROOT, "ui");
@@ -38,6 +39,8 @@ const DEFAULT_RUNTIME_ROOT = ONE_SHOT_RECORD_ID
     ? path.join(APP_ROOT, "runtime", "one-shot", `company_${ONE_SHOT_RECORD_ID}`)
     : path.join(APP_ROOT, "runtime");
 const RUNTIME_ROOT = path.resolve(process.env.CAPTURE_RUNTIME_ROOT ?? DEFAULT_RUNTIME_ROOT);
+const marketDiscovery = new MarketDiscovery(APP_ROOT,
+    process.env.MARKET_DISCOVERY_ROOT ?? path.join(RUNTIME_ROOT, "market-discovery"));
 const SHARED_RUNTIME_ROOT = ONE_SHOT_MODE
     ? RUNTIME_ROOT
     : path.resolve(process.env.CAPTURE_SHARED_RUNTIME_ROOT ?? path.join(APP_ROOT, "runtime"));
@@ -1031,6 +1034,21 @@ async function readBody(request: http.IncomingMessage): Promise<unknown> {
         throw new Error("request body too large");
     return JSON.parse(body.toString("utf8"));
 }
+/** EN: Bound the downstream control body and never echo malformed input in errors.
+ * ZH: 限制下游控制请求体，错误响应不回显用户输入。 */
+async function readMarketBody(request: http.IncomingMessage): Promise<unknown> {
+    const chunks: Buffer[] = [];
+    let size = 0;
+    for await (const chunk of request) {
+        const bytes = Buffer.from(chunk);
+        size += bytes.length;
+        if (size > 16 * 1024) throw new Error("MARKET_BODY_TOO_LARGE");
+        chunks.push(bytes);
+    }
+    if (!chunks.length) return null;
+    try { return JSON.parse(Buffer.concat(chunks).toString("utf8")); }
+    catch { throw new Error("MARKET_BODY_INVALID_JSON"); }
+}
 /** EN: Define the contentType contract or operation in this module.
  * ZH: 定义本模块的 contentType 契约或操作。 */
 function contentType(filePath: string): string {
@@ -1072,6 +1090,37 @@ async function serveStatic(requestPath: string, response: http.ServerResponse): 
 const server = http.createServer(async (request, response) => {
     const url = new URL(request.url ?? "/", `http://${HOST}:${PORT}`);
     try {
+        if (url.pathname.startsWith("/api/market-discovery/")) {
+            if (request.headers.origin && request.headers.origin !== url.origin) {
+                jsonResponse(response, 403, { error: "MARKET_CONTROL_ORIGIN_REFUSED" });
+                return;
+            }
+            if (request.method === "GET" && url.pathname === "/api/market-discovery/status") {
+                jsonResponse(response, 200, await marketDiscovery.snapshot());
+                return;
+            }
+            if (request.method === "POST" && url.pathname === "/api/market-discovery/start") {
+                const body = await readMarketBody(request);
+                const job = engine.status();
+                const context = job.id ? { jobRef: sha256(job.id), phase: job.phase } : undefined;
+                try {
+                    jsonResponse(response, 202, await marketDiscovery.start(body, context));
+                } catch (error) {
+                    const code = error instanceof Error ? error.message : "MARKET_START_FAILED";
+                    jsonResponse(response, code.includes("BUSY") || code.includes("RUNNING") ? 409 : 400,
+                        { error: /^[A-Z0-9_]+$/.test(code) ? code : "MARKET_START_FAILED" });
+                }
+                return;
+            }
+            if (request.method === "POST" && url.pathname === "/api/market-discovery/cancel") {
+                await readMarketBody(request);
+                await marketDiscovery.cancel();
+                jsonResponse(response, 202, await marketDiscovery.snapshot());
+                return;
+            }
+            jsonResponse(response, 404, { error: "MARKET_ROUTE_NOT_FOUND" });
+            return;
+        }
         if (request.method === "GET" && url.pathname === "/api/status") {
             const browser = await browserManager.status();
             jsonResponse(response, 200, {
@@ -1391,6 +1440,11 @@ const server = http.createServer(async (request, response) => {
     }
     catch (error) {
         const message = error instanceof Error ? error.message : String(error);
+        if (url.pathname.startsWith("/api/market-discovery/")) {
+            const bodyError = ["MARKET_BODY_TOO_LARGE", "MARKET_BODY_INVALID_JSON"].includes(message);
+            jsonResponse(response, bodyError ? 400 : 500, { error: bodyError ? message : "MARKET_CONTROL_FAILED" });
+            return;
+        }
         jsonResponse(response, 500, { error: message });
     }
 });
@@ -1400,6 +1454,7 @@ server.listen(PORT, HOST, () => {
 });
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
     process.on(signal, () => {
-        void releaseQueueReservation().finally(() => server.close(() => process.exit(0)));
+        void Promise.allSettled([releaseQueueReservation(), marketDiscovery.cancel()])
+            .finally(() => server.close(() => process.exit(0)));
     });
 }

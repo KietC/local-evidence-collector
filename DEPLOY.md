@@ -6,7 +6,7 @@
 Do these steps in order. The guide describes commands to run, not a claim they have run successfully on your machine. Stop at a failed checkpoint; do not launch a second owner to conceal the first failure.
 
 ### 1. Install prerequisites
-Install Node.js 24+ and npm from the official Node.js distribution. Electron is installed through the dependency lock; a GPU and Python are not collector prerequisites.
+Install Node.js 24+ and npm from the official Node.js distribution. Electron is installed through the dependency lock; a GPU and Python are not collector prerequisites. The optional market-discovery priority/handoff stages and evidence Skill helpers need Python 3.11+.
 ```powershell
 node --version
 npm.cmd --version
@@ -98,12 +98,52 @@ These are optional explicit maintainer validation commands. npm tests use synthe
 Use the application's stop/cancel controls. Preserve manifests and checkpoints before shutdown. Confirm owner identity and descendant exit before reopening a workspace. Existing PID locks have known limits; do not manually remove a lock just to make startup proceed.
 Keep source updates separate from evidence. Retain old session artifacts; a successor uses changed input/config/code bindings. Never silently retry the same failed input until its cause is understood.
 
+### 9. Use the integrated market-discovery workflow
+
+This workflow uses the same checkout and local control panel. It does not require
+a second repository, CRM account, model service or global Skill installation.
+Check Python before running its priority/handoff bridges:
+
+```powershell
+python --version
+npm.cmd run market:check
+if ($LASTEXITCODE -ne 0) { throw 'Market discovery synthetic checks failed.' }
+npm.cmd run market:discovery -- --stage=demo --root=runtime/market-discovery
+if ($LASTEXITCODE -ne 0) { throw 'Market discovery synthetic demo failed.' }
+```
+
+The CLI requires `--root`; the example explicitly selects an ignored runtime.
+The control panel normally defaults to `runtime/market-discovery`, or uses its
+configured `MARKET_DISCOVERY_ROOT`. The demo creates a separate synthetic
+child runtime. A successful demo validates the local stage chain against invented
+data; it performs no live business discovery and does not approve real candidates.
+
+For real work, choose one local runtime, then prepare `inputs/regions.csv`, a
+stable licensed `inputs/cldr.xml` and optional `inputs/reviewed_terms.jsonl`.
+Use `plan`, followed by bounded `search`/`penetrate`, then `verify`. Network access
+requires `--allow-network`; the control panel exposes the same stage choices and
+local receipts. Read [Market Discovery](docs/MARKET_DISCOVERY.md) for exact schemas,
+stage options and the difference between offline and live receipts.
+
+Only after public evidence has been reviewed should `inputs/approved_public.jsonl`
+enter `handoff`. An optional `priority` stage consumes already-prepared minimal
+local customer/public projections and a private `MARKET_DISCOVERY_HMAC_KEY`
+environment value; it changes scan order only. Runtime data, keys, rankings,
+retrieved pages and output records must stay local and out of source control.
+The next `penetrate` stage validates and consumes the resulting local domain-order
+pointer before selecting its limited set of targets; a hash mismatch blocks it.
+Handoff retains a null CRM binding and cannot write a CRM record or send outreach.
+
+Use a new output for a successor run; inspect `stages/<stage>/latest.json` and its
+immutable run receipt. A `COMPLETE` stage receipt does not prove every source or
+every company claim is correct. Keep blocked, failed and partial evidence visible.
+
 ## 简体中文
 
 本指南必须按顺序操作；写出命令不代表你的机器已经验证通过。遇到失败检查点立即处理原因，不用第二个 owner 掩盖第一个失败。
 
 ### 1. 安装前提
-安装官方 Node.js 24+ 和 npm，先执行英文段的版本命令。Electron 由锁定依赖安装；基础采集不需要 GPU 或 Python。PATH 仍指向旧版本时换新终端，不混用解释器。
+安装官方 Node.js 24+ 和 npm，先执行英文段的版本命令。Electron 由锁定依赖安装；基础采集不需要 GPU 或 Python。市场发现优先级/交接桥接及证据技能辅助工具需要 Python 3.11+。PATH 仍指向旧版本时换新终端，不混用解释器。
 
 ### 2. 下载源码、安装、构建、资源检查
 从仓库根目录依次执行英文 PowerShell 命令。每一步必须检查退出码。`npm ci` 使用现有 lock；Electron 下载失败应修复下载条件，不擅自升级依赖。项目使用 `playwright-core`，不会自动安装通用浏览器集合。
@@ -126,3 +166,18 @@ Keep source updates separate from evidence. Retain old session artifacts; a succ
 
 ### 8. 安全停止、恢复和升级
 用应用取消/停止入口，保留 manifest/checkpoint。确认 owner 与子进程已退出后再重开。现有 PID 锁有局限，不能手删锁绕过。更新源码不覆盖 evidence，输入或配置变化用 successor，失败原因未知时不反复执行相同输入。
+
+### 9. 使用同仓库市场发现
+
+先确认 Python 3.11+，运行 `npm run market:check`，再运行英文段的 `market:discovery -- --stage=demo`。
+CLI 必须显式传入 `--root`；示例中的 `runtime/market-discovery` 已被 Git 忽略，
+控制面板通常默认选它，也可在启动前配置 `MARKET_DISCOVERY_ROOT`。demo 在其下独立建立虚构运行，
+不访问真实市场或批准真实候选。无需另建仓库、启用 CRM 账号、模型服务或全局安装技能。
+
+真实任务先准备地区表、稳定 CLDR 和已审核词条；按 plan/search/penetrate/verify
+推进，联网必须显式开启。CLI 与本机控制面板使用同一阶段契约，见[详细输入说明](docs/MARKET_DISCOVERY.md)。
+机械核验后仍需人工准备 `inputs/approved_public.jsonl`，再运行 handoff。
+可选 priority 仅读取已准备好的最小客户/公开企业投影及环境中的私有 HMAC 密钥，
+只改变扫描顺序。数据、排名、密钥、网页证据、结果均留在本地忽略目录。
+下一次 penetrate 校验并消费本地域名顺序，在应用上限前排序；哈希不一致时阻断。
+阶段完成不等于企业事实成立；交接仍为空 CRM 绑定，不自动写客户或发开发信。
