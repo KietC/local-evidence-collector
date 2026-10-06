@@ -78,6 +78,53 @@
         </div>
       </section>
 
+      <section class="panel market-panel" aria-labelledby="market-heading">
+        <div class="section-head">
+          <div><div class="eyebrow">MARKET DISCOVERY</div><h3 id="market-heading">厂家与经销商发现</h3></div>
+          <span id="market-status-badge" class="status-badge offline" role="status">读取状态中</span>
+        </div>
+        <p class="market-intro">可独立运行，无需先完成客户采集。按阶段处理本地输入，交接结果等待人工复核。</p>
+        <fieldset id="market-controls" class="market-controls">
+          <legend class="sr-only">发现任务设置</legend>
+          <label class="market-field market-selection" for="market-markets">市场代码
+            <input id="market-markets" placeholder="如 NL, DE, AE" maxlength="300" autocomplete="off" spellcheck="false" aria-describedby="market-markets-hint">
+            <small id="market-markets-hint">两位国家/地区代码，逗号分隔；留空使用已配置市场。</small>
+          </label>
+          <label class="market-field" for="market-limit">本次任务上限
+            <input id="market-limit" type="number" min="1" max="100" step="1" value="20" required inputmode="numeric">
+          </label>
+          <label class="market-field" for="market-concurrency">并发任务
+            <input id="market-concurrency" type="number" min="1" max="4" step="1" value="2" required inputmode="numeric">
+          </label>
+          <label class="market-network" for="market-allow-network">
+            <input id="market-allow-network" type="checkbox">
+            <span>允许本次操作访问公开网站<small>搜索、官网检索需要勾选；核验默认离线，勾选后可联网。</small></span>
+          </label>
+        </fieldset>
+        <div class="market-actions" aria-label="选择发现阶段">
+          <button type="button" class="button secondary" data-market-stage="plan" disabled>规划查询</button>
+          <button type="button" class="button secondary" data-market-stage="search" disabled>搜索候选</button>
+          <button type="button" class="button secondary" data-market-stage="penetrate" disabled>官网检索</button>
+          <button type="button" class="button secondary" data-market-stage="verify" disabled>核验证据</button>
+          <button type="button" class="button secondary" data-market-stage="handoff" disabled>生成交接</button>
+          <button type="button" class="button secondary" data-market-stage="demo" disabled>离线演示</button>
+        </div>
+        <div class="market-state-line">
+          <p id="market-detail" class="job-detail" aria-live="polite">只读取任务状态，不会自动开始。</p>
+          <button id="market-cancel" type="button" class="button danger" hidden>停止发现任务</button>
+        </div>
+        <div class="market-inputs" aria-label="本地输入就绪状态">
+          <span data-market-input="regions">地区 —</span><span data-market-input="cldr">语言映射 —</span>
+          <span data-market-input="terms">术语 —</span><span data-market-input="specs">任务规格 —</span>
+          <span data-market-input="reviewed">已复核公开项 —</span>
+          <span data-market-input="customerProjection">客户最小投影 —</span><span data-market-input="publicEntities">公开身份 —</span>
+        </div>
+        <dl id="market-counts" class="metrics market-counts" aria-label="发现任务计数"></dl>
+        <div class="path-card"><span>发现工作目录</span><code id="market-root">尚未读取</code></div>
+        <p id="market-last-completed" class="market-meta">尚无完成记录</p>
+        <p id="market-error" class="market-error" role="alert" hidden></p>
+      </section>
+
       <section class="panel evidence-panel">
         <div class="section-head">
           <div><div class="eyebrow">EVIDENCE VAULT</div><h3>本地证据库</h3></div>
