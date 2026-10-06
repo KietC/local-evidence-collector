@@ -1,7 +1,7 @@
 {
   "schema": 2,
   "scope": "GENERALIZED_PUBLIC_SOURCE_ONLY",
-  "baseline_commit": "e835d466cb62da7c3d30fcf59fdb0e64f2b3cc7e",
+  "baseline_commit": "1e885c7cc430deb6879606fe2de2950feacfe2b0",
   "license": "MIT",
   "hash_normalization": "UTF8_LF",
   "files": [
@@ -62,8 +62,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "1c0c64a984e182b9a4102302e0d2c3ea51e4fcfed1f11b8c8bdf881c9132af15",
-      "bytes": 14894
+      "sha256": "279dbcbae3a7da7505f4f0e212e6b8312cf6a428363e5bc5954dee2dbe967078",
+      "bytes": 23743
     },
     {
       "path": "SECURITY.md",

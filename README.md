@@ -1,5 +1,5 @@
 # Local Evidence Collector
-**Local browser evidence capture and multilingual market discovery, with local review workflows and repository Skills.**
+**Save website records locally, or research public manufacturers and dealers across selected markets.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D24-green.svg)](package.json)
@@ -7,18 +7,41 @@
 
 ## English
 
-### What this project does
-An Electron desktop shell and Playwright engine collect record-scoped pages, observed responses, related messages and attachments into a local evidence workspace. Content hashes, session artifacts and explicit reconciliation states make failures visible.
+### Choose the job you want to do
 
-The bundled **Evidence Pipeline Guard** Skill adds operational guidance and two independent Python utilities. It is not automatically invoked by the collector, does not change its state machine, and does not turn a capture into a production-certified dataset.
+This project has **two separate workflows**. Capture saves records from a website you have adapted. Market Discovery finds and reviews public company leads. Neither workflow writes CRM records or sends outreach.
 
-The integrated **Market Discovery** module adds region/language planning, public
-manufacturer/dealer research, evidence checks and a reviewed public handoff. Its
-optional local customer ranking changes scan order only. Use the CLI or the local
-control panel; real inputs, rankings, keys and results stay in ignored local runtime
-storage. No stage writes CRM records or sends outreach.
+| Your job | Choose | Input → result | First task |
+| --- | --- | --- | --- |
+| Preserve one website record and its supporting material | **Capture** | Accepted website adapter + selected record → local pages, observed responses, messages/files where available, source indexes and missing-item status | Run the local record demo below. |
+| Find manufacturers/dealers in selected regions and languages | **Market Discovery** | Region table + language metadata + reviewed product terms → search candidates, evidence checks and an approved JSONL/CSV handoff | Run the offline market demo below. |
 
-**The shipped adapter and demo contain synthetic loopback data only. This is not a ready-made connector for a commercial service.** Another source needs its own field, response, pagination, identity and relationship acceptance checks. An origin change alone is insufficient.
+Use it when you need to:
+
+- **Review a website record later:** preserve its original pages and files locally instead of relying on a changing screen.
+- **Resume incomplete collection:** see which configured items failed or are missing before explicitly retrying them.
+- **Research a market:** plan local-language searches, inspect public company pages, and keep reviewed leads separate from unverified results.
+
+### See a small result first
+
+The capture demo serves **invented record `1001`** at `http://127.0.0.1:4877/records`. Most related collections are empty; it demonstrates the local workflow, not a real customer archive or large-scale completeness.
+
+The offline market demo uses invented inputs to exercise the stage chain and save local receipts. It makes no live business search and approves no real company. Choose either demo in [Quick start](#quick-start); you do not need a commercial-platform login for them.
+
+### Real platforms and development background
+
+The capture workflow grew out of **OKKI / Xiaoman CRM** record collection. This public repository generalizes that engine and ships a **local synthetic adapter**, not the real OKKI adapter. For the OKKI-specific application, see [CRM Evidence Workbench](https://github.com/KietC/crm-evidence-workbench). Changing an adapter's domain alone does not adapt a new service.
+
+| Platform or source | Role here | Current capability and limit |
+| --- | --- | --- |
+| OKKI / Xiaoman CRM | Development background of record capture | The platform-specific adapter is in the CRM workbench; this repository defaults to the synthetic loopback service on port `4877`. |
+| Bing RSS, Seznam, DuckDuckGo, Brave, Yahoo US / Japan, Baidu, Sogou and Naver | Market-search sources | The [search implementation](modules/market-discovery/legacy/run_multisource_search.mjs) selects regional and rotating global engines for a task. Live requests need explicit network opt-in; blocked pages, changed markup and partial results remain visible. This is not a promise that every engine currently works. |
+| Company official websites | Candidate page inspection | Selected public pages supply identity/product/role evidence. Patterns and search snippets still need human review. |
+| Unicode CLDR | Region/language planning | [Planning code](modules/market-discovery/legacy/prepare_foundation.mjs) uses territory/language metadata from a supplied stable release. CLDR data is not bundled and does not validate technical translations. |
+| Google Translate public endpoint | Optional terminology candidates | Online planning without supplied reviewed terms can request translation/back-translation at `translate.googleapis.com`. Machine candidates remain pending review and cannot become accepted query terms merely because back-translation looks similar. No paid Translate API client or availability guarantee is bundled. |
+| Codex | Optional operator/agent guidance | Repository Skills guide evidence review and market work; they are not automatically invoked by capture. |
+
+**SignalHire, LinkedIn and Facebook are not shipped as ready-to-run capture adapters.** Finding a link to one of these services does not add its login, pagination or profile reader. A new capture source needs its own fields, responses, identity and relationship checks using the [adapter acceptance checklist](docs/ADAPTER_ACCEPTANCE.md).
 
 ### Start here
 | Goal | Read first |
@@ -31,7 +54,12 @@ storage. No stage writes CRM records or sends outreach.
 | Install/use the optional Skill | [Skill integration](docs/SKILL_INTEGRATION.md) |
 | Package an allowed source release | [Public release boundary](docs/PUBLICATION.md), [release review](docs/PUBLIC_RELEASE_REVIEW.md) |
 
-### Features
+### How the workflows work
+
+Capture uses an Electron desktop shell and Playwright engine. It saves scoped pages, observed responses and configured related material; hashes and session checks expose gaps. The integrated market module has its own CLI/control-panel stages and private runtime. An optional local customer ranking changes scan order only, never evidence or company status.
+
+The bundled **Evidence Pipeline Guard** Skill supplies guidance and two independent Python utilities. It is not a capture hook, does not change the collector's state machine, and does not certify production data.
+
 - Dedicated desktop browser, loopback control UI and scoped navigation.
 - Observed API responses, bounded pagination, message details and relation windows.
 - Documents, attachments, screenshots, DOM snapshots and local viewers.
@@ -84,6 +112,16 @@ receipts](docs/MARKET_DISCOVERY.md) before running a real market.
 After `priority`, `penetrate` consumes the hash-bound local ordering of unambiguous
 matched public domains before applying its task limit; evidence and scores remain
 unchanged.
+
+### Choose a related project
+
+| If your next task is… | Project | Relationship |
+| --- | --- | --- |
+| Capture and review an OKKI customer history | [CRM Evidence Workbench](https://github.com/KietC/crm-evidence-workbench) | Platform-specific CRM application; do not substitute this generic demo adapter. |
+| Prepare and compare an exhibitor directory | [Exhibitor Research Archive](https://github.com/KietC/exhibitor-research-archive) | Separate portal/list preparation workflow. |
+| Investigate who manufactures one exact product | [FactoryTrace](https://github.com/KietC/factorytrace) | Reviewed market leads and original sources can be research inputs; an automatic handoff adapter is not shipped. |
+| Transcribe local audio/video attachments | [Polyglot Media Workbench](https://github.com/KietC/polyglot-media-workbench) | Separate media-processing tool; no automatic capture-to-ASR pipeline here. |
+| Read compatible phone captions on a PC | [Caption Relay](https://github.com/KietC/caption-relay) | Separate live-text transport; does not recognize audio in this collector. |
 
 ### Configuration
 | Variable | Role | Default / requirement |
@@ -169,12 +207,41 @@ Report reproducible issues using synthetic examples. Do not attach private logs 
 
 ## 简体中文
 
-### 项目是什么
-Electron 桌面界面与 Playwright 引擎将指定记录的页面、已观察响应、相关消息和附件保存到本机，并通过哈希、会话产物和明确对账状态暴露失败。
+### 先选你要做的事
 
-新增的 **Evidence Pipeline Guard** 是可选技能及两个独立 Python 工具，不会自动接入采集器、不修改其状态机，也不产生生产数据认证。默认适配器和演示只包含本机虚构数据，不是任何商业平台的现成连接器。换域名不能替代字段、分页、身份及关系验收。
+本项目有**两条独立路线**：采集路线保存已适配网站的记录；市场发现路线寻找和审查公开企业线索。两者都不写 CRM，也不自动发送开发消息。
 
-**Market Discovery** 已在同一仓库集成地区/语言任务、公开厂家与经销商发现、证据核验和人工复核后的交接，可从 CLI 或本机控制面板运行。可选本地客户排名只改变扫描顺序；真实输入、排名、密钥和结果留在忽略的数据目录。流程不写 CRM，也不自动发送开发信。
+| 你的任务 | 选哪条路线 | 输入 → 产出 | 第一个小任务 |
+| --- | --- | --- | --- |
+| 保存一条网站记录及支持材料 | **Capture 采集** | 已验收适配器 + 指定记录 → 本地页面、已观察响应、可用消息/文件、来源索引和缺失状态 | 运行下方本机记录演示。 |
+| 在指定地区和语言中寻找厂家/经销商 | **Market Discovery 市场发现** | 地区表 + 语言资料 + 已审核产品词 → 搜索候选、材料检查和已批准 JSONL/CSV 交接文件 | 运行下方离线市场演示。 |
+
+适合三个场景：
+
+- **日后复盘网站记录：**把原始页面与文件保存在本机，方便回看，不依赖不断变化的网页。
+- **继续未完成的采集：**先看哪些已配置项目失败或缺失，再明确补采。
+- **开展市场研究：**规划当地语言搜索、查看公开企业页面，将已审线索与未经核实的结果分开。
+
+### 先看一个小结果
+
+采集演示在 `http://127.0.0.1:4877/records` 提供**虚构记录 `1001`**。多数关联集合为空，只演示本机流程，不代表真实客户档案或大规模完整采集。
+
+离线市场演示用虚构输入走完阶段链并保存本地回执，不搜索真实企业、不批准真实候选。按下方安装步骤选其中一条路线，演示都不需要商业平台登录。
+
+### 真实平台与开发背景
+
+采集流程最初来自 **OKKI / 小满 CRM** 的记录保存工作。本公开仓库将引擎通用化，默认只附**本机虚构适配器**；真实 OKKI 适配器在 [CRM Evidence Workbench](https://github.com/KietC/crm-evidence-workbench)。换一个域名不能完成新平台适配。
+
+| 平台或来源 | 在这里的作用 | 当前能力与限制 |
+| --- | --- | --- |
+| OKKI / 小满 CRM | 记录采集的开发背景 | 平台专用适配器在 CRM 工作台；本仓库默认使用 `4877` 端口的本机虚构服务。 |
+| Bing RSS、Seznam、DuckDuckGo、Brave、Yahoo 美国/日本、百度、搜狗、Naver | 市场搜索来源 | [搜索实现](modules/market-discovery/legacy/run_multisource_search.mjs)按任务选择地区引擎与轮换全球引擎。联网须明确开启；阻断、页面变化和部分结果保留，不承诺所有引擎当前都能使用。 |
+| 企业官方网站 | 深入检查候选页面 | 从选定公开页面整理主体、产品、业务角色材料；正则匹配和搜索摘要仍需人工审查。 |
+| Unicode CLDR | 地区与语言规划 | [规划代码](modules/market-discovery/legacy/prepare_foundation.mjs)读取使用者提供的稳定版地区/语言资料；不附 CLDR 数据，也不用于证明专业术语翻译正确。 |
+| Google Translate 公共接口 | 可选术语候选 | 联网规划且未提供已审核词条时，可通过 `translate.googleapis.com` 翻译与回译。机器候选仍待审核，回译相似不能自动成为已接受查询词；不附付费 Translate API 客户端，也不保证该接口可用。 |
+| Codex | 可选人员/代理工作指导 | 仓库 Skill 指导证据复核与市场研究，不会由采集器自动调用。 |
+
+**本仓库没有 SignalHire、LinkedIn 或 Facebook 的开箱采集适配器。** 找到这些平台的链接，不等于具备登录、分页和个人资料读取能力。接新来源要按[适配器验收表](docs/ADAPTER_ACCEPTANCE.md)核对字段、响应、身份和关联关系。
 
 ### 按顺序使用
 新机先读 [DEPLOY.md](DEPLOY.md)；配置或卡住时读[配置与避坑](docs/SETUP_AND_PITFALLS.md)；接新系统读[适配器指南](docs/ADAPTERS.md)和[验收表](docs/ADAPTER_ACCEPTANCE.md)；核心实现见[源码地图](docs/CORE_CODE_GUIDE.md)；安装技能见[集成说明](docs/SKILL_INTEGRATION.md)。
@@ -195,6 +262,22 @@ npm run smoke
 priority 的本地哈希绑定域名顺序会用于下一次 penetrate，仅对无歧义精确匹配调序，
 不改变证据、评分，也不把客户字段带入搜索查询。
 完整输入、阶段回执和人工复核边界见[市场发现](docs/MARKET_DISCOVERY.md)。
+
+### 后续任务选哪个项目
+
+| 接下来要做什么 | 项目 | 关系 |
+| --- | --- | --- |
+| 保存并复盘 OKKI 客户历史 | [CRM Evidence Workbench](https://github.com/KietC/crm-evidence-workbench) | 平台专用 CRM 应用，不能用本仓库虚构适配器替代。 |
+| 整理、比较展商名册 | [Exhibitor Research Archive](https://github.com/KietC/exhibitor-research-archive) | 独立的网站名单准备流程。 |
+| 调查某款精确产品的制造方 | [FactoryTrace](https://github.com/KietC/factorytrace) | 已审市场线索和原件可作调查输入，尚未提供自动交接适配器。 |
+| 转写本地音视频附件 | [Polyglot Media Workbench](https://github.com/KietC/polyglot-media-workbench) | 独立媒体处理工具，这里没有自动“采集→ASR”流程。 |
+| 在电脑读兼容手机字幕 | [Caption Relay](https://github.com/KietC/caption-relay) | 独立实时文字传输，不在本采集器里识别声音。 |
+
+### 两条路线的实现
+
+采集由 Electron 桌面界面和 Playwright 引擎处理，保存限定记录、已观察响应及配置的关联材料，通过哈希与会话检查显示缺口。市场模块有自己的 CLI/控制面板阶段和私有运行目录；可选客户排名只改变扫描顺序，不改变事实与公司状态。
+
+附带 **Evidence Pipeline Guard** 是指导流程及两个独立 Python 工具，不是采集钩子，不修改采集状态机，也不认证生产数据。
 
 ### 配置顺序与边界
 先确定源码目录，再确定外部私有 evidence/runtime 目录，再设置完整适配器路径和端口，最后启动。上方表格列出全部主要变量。`.env.example` 不会自动加载；必须在启动应用的同一终端设置环境变量。
